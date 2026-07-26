@@ -1,7 +1,7 @@
 # Decisions — Dossier
 
-A running log of the non-obvious calls made while building this, and why.
-Format: Decision → Why → Tradeoff accepted.
+A log of the non-obvious product and design calls made while building this,
+and the reasoning behind each. Format: Decision → Why → Tradeoff accepted.
 
 ---
 
@@ -9,37 +9,38 @@ Format: Decision → Why → Tradeoff accepted.
 
 **Decision**: Ship as an installable Progressive Web App, not a native app.
 
-**Why**: The explicit goal was "installable, and I want to put it on GitHub
-so other people can use it too." Native iOS requires a $99/year Apple
-Developer account and App Store review just to distribute, which breaks
-"share a repo link, anyone installs it." A PWA installs from a browser on
-both iOS (Add to Home Screen) and Android (native install prompt), with one
-codebase, no gatekeeper, no cost.
+**Why**: The distribution requirement was "installable, and shareable via a
+public repo link, no gatekeeper." Native iOS requires a paid developer
+account and App Store review just to distribute, which breaks that
+requirement outright. A PWA installs from a browser on iOS, Android, and
+desktop from one codebase, no review process, no cost.
 
-**Tradeoff accepted**: No push notifications on iOS PWAs. Judged acceptable
-since v1 deliberately excludes push/reminder mechanics anyway (see PRD,
-testing pull over push).
+**Tradeoff accepted**: No push notifications on iOS PWAs. Acceptable
+because v1 deliberately excludes push/reminder mechanics anyway, see PRD,
+the product is testing pull before push.
 
 **Not closed off**: PWABuilder or Capacitor can wrap the same codebase into
-real App Store/Play Store builds later with no rewrite, documented in the
-README so this isn't a dead end, just a sequencing choice.
+real App Store/Play Store builds later with no rewrite, kept as a
+documented, sequenced option rather than a dead end.
 
 ---
 
 ### 2. No backend, no accounts, local storage only
 
-**Decision**: All state (read progress, saved items, spaced-repetition
-schedule) lives in the browser's localStorage, per device. No login, no
-server, no analytics.
+**Decision**: All state, read progress, saved items, spaced-repetition
+schedule, lives in the browser's localStorage, per device. No login, no
+server, no telemetry in v1.
 
-**Why**: This is a personal learning tool, not a platform. A backend adds
-hosting cost, auth complexity, and privacy surface area for zero benefit at
-this scope. It also means anyone who forks the repo gets a fully working
-app with no setup, no environment variables, no signup flow.
+**Why**: A backend adds hosting cost, auth complexity, and privacy surface
+area with no corresponding value at this stage of validation. It also
+means the repo is fully self-contained, anyone who forks it gets a working
+product with zero setup.
 
-**Tradeoff accepted**: No cross-device sync. Reading progress on your phone
-doesn't show up on your laptop. Acceptable because the primary use case is
-a single phone, used daily, not a multi-device workflow.
+**Tradeoff accepted**: No cross-device sync, and no usage data to inform
+iteration until instrumentation is deliberately added (see PRD, Validation
+Plan). Judged acceptable because premature analytics infrastructure on an
+unvalidated core loop is a common early-stage misallocation, instrumenting
+before proving the loop matters is backwards.
 
 ---
 
@@ -48,124 +49,126 @@ a single phone, used daily, not a multi-device workflow.
 **Decision**: All six category picks are visible at once in a fixed grid,
 no scrolling required to see today's full set.
 
-**Why**: Applies Hick's Law, more visible choices scanned at once is
-faster to decide from than the same choices strung out in a scroll a user
-has to work through serially. Since there are exactly six categories (a
-fixed, known set, not an open-ended feed), a grid that shows the whole set
-in one glance is a better fit than a list designed for unbounded content.
+**Why**: With exactly six categories, a fixed and known set rather than an
+open-ended feed, a layout that surfaces the whole set in one glance
+supports faster decision-making than a list built for unbounded scrolling
+content. The category count was the deciding factor, this pattern doesn't
+generalize past a small, fixed number of choices.
 
-**Tradeoff accepted**: Each card had to shrink significantly (title
-line-clamped to 3 lines, hook text dropped entirely from the home card) to
-fit six cards on one mobile screen without scrolling. Full context is one
-tap away in the reader, so nothing is lost, just deferred a level.
+**Tradeoff accepted**: Each card had to compress significantly, title
+clamped to three lines, teaser text dropped from the home card entirely, to
+fit six cards on one mobile viewport. Full context stays one tap away in
+the reader, so the compression cost information density on the home
+screen, not information access overall.
 
 ---
 
-### 4. Leitner-style spaced repetition instead of a flat "new content" feed
+### 4. Leitner-style spaced repetition instead of a flat content feed
 
 **Decision**: Read stories re-enter rotation on a 1/3/7/14/30-day
-increasing schedule, tagged "Revisit" when due, rather than disappearing
-once read.
+increasing schedule, tagged "Revisit," rather than disappearing once read.
 
-**Why**: The stated problem wasn't "give me things to read," it was "help
-me actually remember and reuse this in conversation." A pure feed optimizes
-for consumption; spaced repetition is a directly evidence-based mechanism
-for retention. Given the user explicitly self-identified as bad at
-memorizing definitions in the abstract, retention (not volume) was the
-actual product to build.
+**Why**: The product's stated value is recall and reuse, not consumption
+volume. A flat feed optimizes for volume; this required optimizing for
+retention specifically, which meant building the mechanic that
+differentiates the product from a newsletter or summary app, not just a
+content pipeline.
 
-**Tradeoff accepted**: More scheduling logic to build and reason about than
-a simple "next unread item" queue. Justified because retention was the
-stated core goal, not a nice-to-have.
-
----
-
-### 5. Visual emphasis for "Revisit" cards (Von Restorff effect)
-
-**Decision**: A due-for-review card gets a distinct color treatment (warm
-coral accent + tinted background) instead of blending into the same visual
-style as new-content cards.
-
-**Why**: The Von Restorff effect, the thing that looks different is the
-thing that gets remembered, is directly useful here: the whole point of a
-revisit card is that it should register as different at a glance, not
-require reading the label to notice.
-
-**Tradeoff accepted**: One more visual state to design and keep consistent
-across a future re-theme (and it was: re-themed once from dark/brass to
-light/lavender, and the revisit-card distinction had to be re-derived in
-the new palette rather than copy-pasted).
+**Tradeoff accepted**: Materially more scheduling logic than a simple
+"next unread item" queue, and a metric (Weekly Recall Sessions) that's
+harder to hit than a raw open-rate number. Accepted because the North Star
+was deliberately anchored to this mechanic rather than to something easier
+to move.
 
 ---
 
-### 6. Small persistent unread marker instead of a "done" checkmark (Zeigarnik effect)
+### 5. Visual emphasis for due-for-review cards
 
-**Decision**: Unread cards get a small dot; read cards get nothing (no
-checkmark, no "completed" state).
+**Decision**: A due-for-review card gets a distinct color treatment, warm
+accent, tinted background, rather than the same visual style as new-content
+cards.
 
-**Why**: The Zeigarnik effect: unfinished things are cognitively stickier
-than finished ones. A checkmark signals closure and reduces the pull to
-return; a small, quiet "not yet" marker does the opposite without being
-naggy about it.
+**Why**: The revisit state needs to register at a glance, not require
+reading a label, since the whole point of surfacing it is to catch
+attention before the user has decided what to read. This is a standard,
+well-documented UX heuristic (cataloged, among other places, in
+growth.design's UX psychology reference), applied here rather than
+originated here.
 
-**Tradeoff accepted**: Less explicit positive feedback for having read
-something. Judged acceptable since positive reinforcement wasn't the
-retention mechanism being relied on here, spaced repetition was.
+**Tradeoff accepted**: One additional visual state to keep consistent
+across future re-themes, and it was, the distinction had to be re-derived
+from scratch in the later light-palette redesign rather than carried over
+directly.
+
+---
+
+### 6. Small persistent unread marker instead of a "done" checkmark
+
+**Decision**: Unread cards get a small dot; read cards get no
+"completed" indicator.
+
+**Why**: A checkmark signals closure and can reduce the pull to return to
+something; an unresolved, low-key marker doesn't. Again, a known UX
+heuristic (also part of the growth.design catalog referenced during this
+build) rather than a novel discovery, applied deliberately to this specific
+screen rather than defaulted into.
+
+**Tradeoff accepted**: Less explicit positive reinforcement for completed
+reads. Accepted since retention here is designed to run on the spaced
+repetition loop, not on completion-badge feedback.
 
 ---
 
 ### 7. Content as a plain JSON file instead of hardcoded in app logic
 
 **Decision**: All story content lives in `content.json`, separate from
-`js/app.js`, with a documented schema.
+application logic, with a documented schema.
 
-**Why**: Two reasons converged: (a) the user wanted to keep adding stories
-over time without touching code, and (b) a defined AI-generation phase was
-explicitly floated as a future possibility. Keeping content as data (not
-code) makes both a manual edit and a future automated content pipeline
-trivial, the app's rendering logic doesn't care where content.json came
-from.
+**Why**: Two requirements converged: ongoing manual content addition
+without touching code, and a scoped-but-deferred AI-generation phase.
+Treating content as data rather than code makes both paths trivial, the
+rendering layer doesn't care where `content.json` came from.
 
-**Tradeoff accepted**: None significant, this is close to strictly better
-than hardcoding, the only cost is one extra fetch call on load, mitigated
-by the service worker caching it for offline use.
+**Tradeoff accepted**: Negligible, one additional fetch call at load time,
+mitigated by service-worker caching for offline use.
 
 ---
 
 ### 8. API key deferred to a documented Phase 2, not built into v1
 
-**Decision**: No live AI content generation in v1. The path to add it later
-(server-held key via a small serverless function, never shipped
-client-side) is documented in the README, not implemented.
+**Decision**: No live AI content generation in v1. The path to add it,
+server-held key via a serverless function, never shipped client-side, is
+scoped in the PRD and README, not implemented.
 
-**Why**: A static GitHub Pages site cannot safely hold a secret, anything
-shipped to the browser is publicly extractable. Building a secure version
-requires a backend, which is a genuinely separate project. Rather than
-either skipping the idea entirely or over-building v1, the decision was to
-scope it out explicitly and leave a clear, written path back to it.
+**Why**: A static site cannot hold a secret safely; anything shipped to the
+browser is extractable. Building this correctly requires backend
+infrastructure, which is a distinct project with its own scope. Rather
+than either skip it or over-build v1 with premature infrastructure, it was
+scoped explicitly and sequenced deliberately after core-loop validation
+(see PRD, Validation Plan, point 5).
 
-**Tradeoff accepted**: Content growth is manual (batch requests, hand-edit
-JSON) until Phase 2 is actually built. Acceptable since manual batches were
-already the agreed v1 content strategy.
+**Tradeoff accepted**: Content growth stays manual until Phase 2 ships.
+Accepted as the correct order of operations, scaling supply into an
+unvalidated loop is a common and avoidable early-stage mistake.
 
 ---
 
-### 9. Re-theme from dark "dossier" aesthetic to light lavender palette
+### 9. Full re-theme from a dark "dossier" aesthetic to a light palette
 
-**Decision**: Initial visual direction was an ink-navy, brass-accented
-"intelligence dossier" look (stamped cards, wax-seal icon). Rebuilt
-entirely around a light lavender palette with a softer violet accent,
-pastel category colors, larger corner radii, and lighter shadows, on
-explicit user feedback that the original felt too intense for the actual
-desired vibe (light and fun).
+**Decision**: The initial visual direction, ink-navy background, brass
+accents, stamped-document styling, was fully rebuilt around a light
+lavender palette, a softer accent color, pastel category coding, larger
+corner radii, and lighter shadows, following a self-directed usability
+review that flagged a mismatch between visual tone and intended experience.
 
-**Why**: Visual tone is a product decision, not just decoration, "sounding
-smart" and "having fun learning" are different emotional targets, and a
-dark, formal, classified-file aesthetic actively worked against the second
-one once that was made explicit.
+**Why**: Visual tone is a product decision with real behavioral
+consequences, not decoration. "Sound sharp in conversation" and "enjoy a
+daily learning habit" are related but distinct emotional targets, and a
+dark, formal, clearance-document aesthetic actively worked against the
+second one once that gap was identified.
 
-**Tradeoff accepted**: A full re-theme rather than an incremental tweak,
-new icon set, new accent system, new shadow/radius language, because the
-color tokens were structured for exactly this (CSS custom properties
-throughout), the rebuild was fast, validating that token-based theming was
-worth the setup cost even in a small app.
+**Tradeoff accepted**: A full re-theme rather than an incremental
+adjustment, new icon system, new accent language, new shadow and radius
+scale, because the visual system was originally structured around CSS
+custom properties specifically to make a full re-theme cheap if needed.
+That structural choice paid for itself directly here.
