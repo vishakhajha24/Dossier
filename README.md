@@ -10,6 +10,14 @@ No backend, no accounts, no API key required to run it. Everything (reading
 progress, saved items, spaced-repetition schedule) is stored locally in the
 browser via `localStorage`, per device.
 
+**Live demo**: add your GitHub Pages URL here once deployed, e.g.
+`https://vishakhajha24.github.io/Dossier/`
+
+**Product writeup**: this repo doubles as a small case study.
+- [`CASE_STUDY.md`](./CASE_STUDY.md) — the problem, the constraints, what got built, what's next
+- [`PRD.md`](./PRD.md) — goal, target user, success criteria, v1 scope vs. what was deferred and why
+- [`DECISIONS.md`](./DECISIONS.md) — the specific product/design tradeoffs made along the way (PWA vs. native, spaced repetition, applied UX psychology, a full visual re-theme, and more)
+
 ## Deploy it (GitHub Pages, free, ~5 minutes)
 
 1. Create a new GitHub repo (public, so Pages works on the free tier), e.g. `dossier`.
@@ -61,8 +69,7 @@ format, no coding required beyond editing JSON.
 
 ## Phase 2: AI-generated content (optional, not built yet)
 
-You asked to keep this path open, here's the shape it would take when you're
-ready:
+Kept the door open on purpose, here's the shape it would take when ready:
 
 - A small serverless function (Cloudflare Worker or Vercel function, both
   have free tiers) holds your Anthropic API key **server-side**. It must not
@@ -92,19 +99,25 @@ doing once you know which categories you actually want more of.
 - Opening a category from the home card lets you swipe left/right through
   every story in that category, not just the daily one, each swipe marks
   that story as read and updates its review schedule.
+- The daily picks themselves are computed once and cached for the day, they
+  won't change again until your device's date rolls over, even if you read
+  or swipe through everything.
 
 ## File structure
 
 ```
-index.html          entry point
-manifest.json        PWA metadata (name, icons, colors)
-service-worker.js    offline caching
-css/style.css        all styling
-js/app.js            rendering, routing, swipe reader
-js/storage.js        localStorage read/write helpers
+index.html           entry point
+manifest.json         PWA metadata (name, icons, colors)
+service-worker.js     offline caching
+css/style.css         all styling
+js/app.js             rendering, routing, swipe reader
+js/storage.js         localStorage read/write helpers
 js/scheduler.js       spaced repetition + daily pick logic
-content.json          all story content + category definitions
-icons/                app icons
+content.json           all story content + category definitions
+icons/                 app icons
+CASE_STUDY.md          product case study writeup
+PRD.md                 lightweight PRD
+DECISIONS.md           decision log with reasoning and tradeoffs
 ```
 
 ## Use this
