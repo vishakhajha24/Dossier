@@ -1,64 +1,100 @@
 # Dossier — Case Study
 
-**Live demo**: add your GitHub Pages URL here once deployed, e.g.
-`https://vishakhajha24.github.io/Dossier/`
+**Role**: Solo Product Manager & Builder (concept, PRD, UX decisions, content
+strategy, build)
+**Timeline**: Single build cycle, iterated through two design passes based on
+self-directed usability review
+**Stack**: PWA (vanilla JS, no framework dependency), localStorage-based
+state, zero backend
 
-**What it is**: A personal PWA that delivers one bite-sized "briefing card"
-a day per category (business strategy, economics, psychology, consumer
-behavior, growth frameworks, named laws), sized to a 3 to 7 minute read,
-with spaced-repetition resurfacing so it's optimized for actually
-remembering and reusing the content in conversation, not just consuming it
-once.
+**Live demo**: `https://vishakhajha24.github.io/Dossier/`
 
-## The problem
+---
 
-I wanted to build fluency in the kind of reference points sharp business
-communicators use casually: named case studies, economic concepts,
-psychology principles, framed consumer trends. That vocabulary usually gets
-absorbed by accident over years of reading and conversation. I don't have a
-strong economics/psychology background and I'm not naturally good at
-memorizing definitions in the abstract, so a static list of terms wouldn't
-have worked for me. I needed something built around retention, not just
-delivery.
+## The opportunity
 
-## Constraints I set going in
+Professionals in business, product, and strategy roles are frequently
+evaluated, informally, on how fluently they reference the "canon": named
+case studies (Kodak, the Amazon flywheel), economic concepts (Jevons
+paradox), psychology principles (loss aversion), and consumer-behavior
+patterns (the lipstick effect). This fluency is a real signal of business
+literacy, and it currently has no dedicated product. It's assembled by
+accident, over years, from business books, podcasts, and osmosis from
+senior colleagues.
 
-- **3 to 7 minutes per piece.** Long enough to earn real depth (a name with
-  no story behind it isn't usable in conversation), short enough to survive
-  as a daily habit.
-- **No account, no backend.** This needed to be something I could hand to
-  anyone via a repo link and have it just work, no signup, no server cost.
-- **Installable on a phone**, since that's where the daily habit would
-  actually live.
+Adjacent categories exist but none solve this directly:
+- **Newsletters** (Morning Brew, The Hustle) optimize for topical currency,
+  not durable recall, read once, gone by next week.
+- **Book-summary apps** (Blinkist, Shortform) optimize for coverage and
+  compress volume, not for retention or conversational usability.
+- **Spaced-repetition tools** (Anki, Duolingo) solve retention well but are
+  content-agnostic, they're infrastructure, not a curated point of view on
+  what's worth knowing.
 
-## What I built (v1)
+The gap: nothing combines a curated, conversation-ready content point of
+view with a retention mechanic built for actually using the material out
+loud, not just recognizing it on a flashcard.
 
-- Six categories, one daily pick each, shown as a full grid (not a scroll)
-  so the whole day's set is visible at a glance.
-- A swipeable full library per category for anyone who wants to go beyond
-  the daily pick.
-- Leitner-style spaced repetition (1/3/7/14/30-day intervals), so read
-  content comes back later instead of disappearing after one exposure,
-  this is the part actually aimed at the retention problem, not just
-  content delivery.
-- Save-for-later list.
-- A "Say this" pull-quote on every card: a ready-to-use spoken line, since
-  the end goal was always conversational use, not just recognition.
-- Installed as a PWA: offline-capable, no App Store gatekeeping, one
-  codebase working on iOS, Android, and desktop.
+## What I built
 
-See `PRD.md` for the full scope (including what was explicitly deferred)
-and `DECISIONS.md` for the reasoning behind specific product and design
-calls made along the way, including two applied UX psychology principles
-(Von Restorff effect for surfacing due-for-review content, Zeigarnik effect
-for the unread-state indicator) and a full visual re-theme made in response
-to user feedback that the first version's tone didn't match the intended
-experience.
+A PWA that delivers one curated briefing per category per day (six fixed
+categories), capped to a 3-7 minute read, with three product mechanics
+doing the real work:
 
-## What I'd build next
+1. **A retention loop, not a content feed.** Leitner-style spaced
+   repetition (1/3/7/14/30-day intervals) resurfaces read material instead
+   of letting it disappear after one exposure, this is the core bet: the
+   product is undifferentiated without it.
+2. **A conversational output, not just an input.** Every entry ends with a
+   "Say this" line, a scripted, ready-to-use spoken sentence. The product
+   optimizes for the output behavior (using it in a room), not just the
+   input behavior (reading it).
+3. **A deliberately small daily surface.** Six categories, shown as a full
+   grid, zero scrolling required to see the whole day's set. This was a
+   direct constraint decision: more choice at a glance was weighed against
+   fewer, larger cards requiring a scroll, the compact grid won on
+   decision speed.
 
-Documented as Phase 2 in the README: a small server-side function to
-generate new stories on demand via the Anthropic API, keeping the API key
-off the client, so the content library can grow past manual batches without
-compromising the "no backend" simplicity of v1 for anyone who just wants to
-run the app as-is.
+Full reasoning for each call, including what was explicitly rejected, is in
+[`DECISIONS.md`](./DECISIONS.md).
+
+## How I defined success
+
+Full framework in [`PRD.md`](./PRD.md), summarized here:
+
+**North Star Metric**: *Weekly Recall Sessions*, the number of sessions per
+user per week where a story is either newly read or successfully revisited
+via spaced repetition. This was chosen over a simpler "daily active user"
+metric because DAU rewards opening the app; this product's actual value is
+in the revisit loop completing, so the North Star is built around the
+mechanic that differentiates the product, not raw usage.
+
+Supporting metrics, guardrails, and the full instrumentation plan, since v1
+ships with zero telemetry by design, are in the PRD.
+
+## Product iteration, not just delivery
+
+The visual direction changed once, materially, after a self-directed
+usability pass: the original "intelligence dossier" aesthetic (dark,
+formal, stamped-document styling) tested well for the *content* framing but
+worked against the intended *emotional* framing, learning should feel light
+and low-friction, not like clearance paperwork. A full re-theme to a
+lighter, warmer visual system followed. Documented as decision #9 in the
+log, this is the clearest evidence of iteration over a single first-pass
+build.
+
+## What's next
+
+- **Phase 2, content supply**: a server-side generation pipeline (API key
+  held server-side, never client-exposed) to grow the library past manual
+  batches, scoped and ready to build, deliberately not built into v1 to
+  avoid adding backend complexity before the core loop was validated.
+- **Instrumentation**: lightweight, privacy-respecting event logging to
+  actually populate the metrics framework defined in the PRD, currently a
+  hypothesis, not yet measured.
+- **Notification layer**: intentionally excluded from v1 to test whether
+  the core loop earns a daily open on pull alone before adding push.
+
+See [`PRD.md`](./PRD.md) for full scope, competitive landscape, risks, and
+the validation plan for what I'd test first if this moved beyond a personal
+tool.
